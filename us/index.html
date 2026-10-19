@@ -533,7 +533,7 @@ function startECG(){
   cvs.width = innerWidth*DPR; cvs.height = innerHeight*DPR;
   ctx.setTransform(DPR,0,0,DPR,0,0);
   const W = innerWidth, H = innerHeight;
-  const midY = H*0.45;
+  const midY = H*0.5;
   // 预计算整屏波形点
   const amp = W < 640 ? 0.55 : 1;
   const pts = [];
