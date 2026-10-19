@@ -533,11 +533,12 @@ function startECG(){
   const W = cvs.width, H = cvs.height;
   const midY = H*0.38;
   // 预计算整屏波形点
+  const amp = W < 640 ? 0.55 : 1;
   const pts = [];
   for(let x=0;x<=W;x+=2*DPR){
     const phase = (x % 140) / 140;
     let y = midY;
-    if(phase < 0.1) y = midY - 6*DPR*Math.sin(phase/0.1*Math.PI);
+    if(phase < 0.1) y = midY - 6*DPR*amp*Math.sin(phase/0.1*Math.PI);
     else if(phase < 0.2) y = midY;
     else if(phase < 0.23) y = midY + 6*DPR;
     else if(phase < 0.28) y = midY - 55*DPR;
