@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
@@ -278,11 +278,11 @@
   <!-- Stage 3 · 心电图 + 星点 -->
   <div id="stage-tree" class="hidden">
     <canvas id="ecg"></canvas>
-    <canvas id="snow"></canvas>
     <div id="stars"></div>
     <div id="tree-tip">点亮周围的星星，每一颗都是我们的记忆</div>
     <div id="hint">点一点周围的星星 ✦</div>
   </div>
+  <canvas id="snow"></canvas>
 
   <!-- 模糊遮罩 -->
   <div id="blurMask"></div>
@@ -533,7 +533,7 @@ function startECG(){
   cvs.width = innerWidth*DPR; cvs.height = innerHeight*DPR;
   ctx.setTransform(DPR,0,0,DPR,0,0);
   const W = innerWidth, H = innerHeight;
-  const midY = H*0.38;
+  const midY = H*0.45;
   // 预计算整屏波形点
   const amp = W < 640 ? 0.55 : 1;
   const pts = [];
