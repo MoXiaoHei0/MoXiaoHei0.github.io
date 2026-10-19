@@ -529,22 +529,24 @@ startSnowOn('snow');
 function startECG(){
   const cvs = document.getElementById('ecg'), ctx = cvs.getContext('2d');
   const DPR = devicePixelRatio||1;
+  cvs.style.width = innerWidth+'px'; cvs.style.height = innerHeight+'px';
   cvs.width = innerWidth*DPR; cvs.height = innerHeight*DPR;
-  const W = cvs.width, H = cvs.height;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const W = innerWidth, H = innerHeight;
   const midY = H*0.38;
   // 预计算整屏波形点
   const amp = W < 640 ? 0.55 : 1;
   const pts = [];
-  for(let x=0;x<=W;x+=2*DPR){
+  for(let x=0;x<=W;x+=2){
     const phase = (x % 140) / 140;
     let y = midY;
-    if(phase < 0.1) y = midY - 6*DPR*amp*Math.sin(phase/0.1*Math.PI);
+    if(phase < 0.1) y = midY - 6*amp*Math.sin(phase/0.1*Math.PI);
     else if(phase < 0.2) y = midY;
-    else if(phase < 0.23) y = midY + 6*DPR;
-    else if(phase < 0.28) y = midY - 55*DPR;
-    else if(phase < 0.32) y = midY + 14*DPR;
+    else if(phase < 0.23) y = midY + 6*amp;
+    else if(phase < 0.28) y = midY - 55*amp;
+    else if(phase < 0.32) y = midY + 14*amp;
     else if(phase < 0.5) y = midY;
-    else if(phase < 0.75) y = midY - 12*DPR*amp*Math.sin((phase-0.5)/0.25*Math.PI);
+    else if(phase < 0.75) y = midY - 12*amp*Math.sin((phase-0.5)/0.25*Math.PI);
     else y = midY;
     pts.push({x,y});
   }
@@ -553,8 +555,8 @@ function startECG(){
     ctx.clearRect(0,0,W,H);
     // 画到 head 为止的线
     ctx.strokeStyle = 'rgba(255,255,255,.95)';
-    ctx.lineWidth = 1.5*DPR;
-    ctx.shadowColor='rgba(255,255,255,1)';ctx.shadowBlur=12*DPR;
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor='rgba(255,255,255,1)';ctx.shadowBlur=12;
     ctx.beginPath();
     for(let i=0;i<=head && i<pts.length;i++){
       if(i===0) ctx.moveTo(pts[i].x,pts[i].y); else ctx.lineTo(pts[i].x,pts[i].y);
@@ -566,17 +568,17 @@ function startECG(){
       const p = pts[head];
       const breath = 1 + Math.sin(now/300)*0.3;
       // 扩散波纹
-      const rippleR = ((now/12) % 80)*DPR;
+      const rippleR = ((now/12) % 80);
       ctx.beginPath();
       ctx.arc(p.x,p.y,rippleR,0,Math.PI*2);
-      ctx.strokeStyle = `rgba(255,255,255,${0.6*(1-rippleR/(80*DPR))})`;
-      ctx.lineWidth = 2*DPR;
+      ctx.strokeStyle = `rgba(255,255,255,${0.6*(1-rippleR/80)})`;
+      ctx.lineWidth = 2;
       ctx.stroke();
       // 主光点
       ctx.beginPath();
-      ctx.arc(p.x,p.y,5*DPR*breath,0,Math.PI*2);
+      ctx.arc(p.x,p.y,5*breath,0,Math.PI*2);
       ctx.fillStyle='#fff';
-      ctx.shadowColor='#fff';ctx.shadowBlur=28*DPR;
+      ctx.shadowColor='#fff';ctx.shadowBlur=28;
       ctx.fill();
       ctx.shadowBlur=0;
       head += 2;
