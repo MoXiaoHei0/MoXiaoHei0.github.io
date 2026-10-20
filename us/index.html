@@ -626,19 +626,19 @@ function startECG(){
     }
     ctx.stroke();
     ctx.shadowBlur=0;
-    // 画完整心形（切掉底部小尖，切口在基线上）
+    // 画完整心形（在基线上方，切掉底部小尖，切口在基线上）
     if(head < pts.length && pts[head].x > centerX){
-      const s = 3.5*amp;
+      const s = 5*amp;
       ctx.beginPath();
-      // 完整心形参数方程，只画 y >= cutoff 的部分
+      let started = false;
       for(let t=0; t<=Math.PI*2; t+=0.03){
         const hx = 16*Math.pow(Math.sin(t),3);
         let hy = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
-        // hy 范围约 -17 ~ 12，切掉最下面1/8
-        if(hy < -12) continue;
+        // hy 范围约 -17(底部尖) ~ 12(顶部)，切掉底部尖
+        if(hy < -10){ started = false; continue; }
         const sx = centerX + hx*s;
-        const sy = midY + (hy + 12)*s; // 让 cutoff 线在 midY
-        if(t===0 || hy < -12) ctx.moveTo(sx, sy);
+        const sy = midY - (hy + 10)*s; // 翻转 y，让心形在基线上方
+        if(!started){ ctx.moveTo(sx, sy); started = true; }
         else ctx.lineTo(sx, sy);
       }
       ctx.strokeStyle = 'rgba(255,255,255,.95)';
