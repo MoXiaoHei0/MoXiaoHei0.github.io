@@ -371,7 +371,7 @@
   <div id="pwd">
     <h3>🔒 请输入密码</h3>
     <div class="err" id="pwdErr">密码错误</div>
-    <input type="password" id="pwdInput" placeholder="••••" onkeydown="if(event.key==='Enter')checkPwd()">
+    <input type="password" id="pwdInput" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')checkPwd()">
     <div class="row">
       <button class="ok" onclick="checkPwd()">确定</button>
       <button class="cancel" onclick="document.getElementById('pwd').classList.remove('show')">取消</button>
