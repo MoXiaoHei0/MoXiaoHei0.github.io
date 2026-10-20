@@ -598,7 +598,10 @@ function startECG(){
   const heartW = 70*amp; // 心形半宽
   for(let x=0;x<=W;x+=2){
     let y = midY;
-    if(x < centerX - heartW || x > centerX + heartW){
+    // 在心形范围内不画平线，心形单独画
+    if(x > centerX - 80*amp && x < centerX + 80*amp){
+      y = midY; // 占位，后面心形覆盖
+    } else {
       const phase = (x % P) / P;
       if(phase < 0.08) y = midY - 8*amp*Math.sin(phase/0.08*Math.PI);
       else if(phase < 0.18) y = midY;
@@ -608,8 +611,6 @@ function startECG(){
       else if(phase < 0.35) y = midY;
       else if(phase > 0.65) y = midY - 10*amp*Math.sin((phase-0.65)/0.08*Math.PI);
       else y = midY;
-    } else {
-      y = midY; // 心形区域线平着过，后面贝塞尔画心形
     }
     pts.push({x,y});
   }
@@ -621,8 +622,12 @@ function startECG(){
     ctx.lineWidth = 1.5;
     ctx.shadowColor='rgba(255,255,255,1)';ctx.shadowBlur=12;
     ctx.beginPath();
+    let pen = false;
     for(let i=0;i<=head && i<pts.length;i++){
-      if(i===0) ctx.moveTo(pts[i].x,pts[i].y); else ctx.lineTo(pts[i].x,pts[i].y);
+      // 在心形范围内不画平线
+      if(pts[i].x > centerX - 80*amp && pts[i].x < centerX + 80*amp){ pen = false; continue; }
+      if(!pen){ ctx.moveTo(pts[i].x,pts[i].y); pen = true; }
+      else ctx.lineTo(pts[i].x,pts[i].y);
     }
     ctx.stroke();
     ctx.shadowBlur=0;
