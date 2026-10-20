@@ -595,16 +595,31 @@ function startECG(){
   // 预计算 ECG 线的 pts（中间夹一个心形，心形就是线本身）
   const pts = [];
   const centerX = W/2;
-  const heartW = 60*amp; // 心形宽度
+  const heartW = 80*amp; // 心形半宽
+  const heartH = 70*amp; // 心形高度
   for(let x=0;x<=W;x+=2){
     let y = midY;
-    // 在心形范围内：两个圆丘，中间凹下去
-    if(Math.abs(x - centerX) < heartW){
-      const t = (x - (centerX - heartW)) / (heartW*2); // 0~1
-      // 左丘和右丘各一个高斯峰，中间凹
-      const leftPeak = Math.exp(-Math.pow((t-0.25)/0.18, 2));
-      const rightPeak = Math.exp(-Math.pow((t-0.75)/0.18, 2));
-      y = midY - (leftPeak + rightPeak) * 80*amp;
+    const dx = x - centerX;
+    // 在心形范围内
+    if(Math.abs(dx) < heartW){
+      // 心形上半：用心形曲线 y = 11sin³(t) 那种，但只取上半
+      // 简化：心形轮廓的上半，从左到右
+      const t = (dx + heartW) / (heartW*2); // 0~1
+      // 心形方程：两个圆顶
+      // 左半：从0到0.5，右半：0.5到1
+      if(t < 0.5){
+        // 左半：从基线升到左顶
+        const lt = t*2; // 0~1
+        y = midY - Math.sin(lt*Math.PI*0.8) * heartH;
+      } else {
+        // 右半：从右顶降到基线
+        const rt = (t-0.5)*2; // 0~1
+        y = midY - Math.sin((1-rt)*Math.PI*0.8) * heartH;
+      }
+      // 中间凹（心形的谷）
+      if(t > 0.4 && t < 0.6){
+        y += 25*amp;
+      }
     } else {
       const phase = (x % P) / P;
       if(phase < 0.08) y = midY - 8*amp*Math.sin(phase/0.08*Math.PI);
