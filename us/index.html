@@ -368,13 +368,13 @@
   </div>
 
   <!-- 密码弹窗 -->
-  <div id="pwd">
-    <h3>🔒 请输入密码</h3>
-    <div class="err" id="pwdErr">密码错误</div>
-    <input type="password" id="pwdInput" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')checkPwd()">
-    <div class="row">
-      <button class="ok" onclick="checkPwd()">确定</button>
-      <button class="cancel" onclick="document.getElementById('pwd').classList.remove('show')">取消</button>
+  <div id="pwd" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99999;width:min(320px,88vw);background:#fff;border-radius:14px;padding:24px;box-shadow:0 30px 80px rgba(70,100,120,.3);opacity:0;pointer-events:none;transition:opacity .3s ease;">
+    <h3 style="font-size:15px;letter-spacing:.2em;color:#62717e;margin-bottom:14px;text-align:center;">🔒 请输入密码</h3>
+    <div id="pwdErr" style="color:#e74c3c;font-size:11px;text-align:center;margin-bottom:8px;display:none;">密码错误</div>
+    <input type="text" id="pwdInput" placeholder="请输入密码" style="width:100%;padding:12px;border:2px solid #7a8ea1;border-radius:8px;font-size:16px;text-align:center;letter-spacing:.3em;outline:none;margin-bottom:12px;background:#fff;">
+    <div style="display:flex;gap:10px;">
+      <button onclick="checkPwd()" style="flex:1;padding:12px;border:none;border-radius:8px;background:#7a8ea1;color:#fff;font-size:14px;cursor:pointer;">确定</button>
+      <button onclick="document.getElementById('pwd').style.pointerEvents='none';document.getElementById('pwd').style.opacity='0'" style="flex:1;padding:12px;border:none;border-radius:8px;background:#eee;color:#62717e;font-size:14px;cursor:pointer;">取消</button>
     </div>
   </div>
 
@@ -885,11 +885,27 @@ function renderAdminList(){
   });
 }
 document.getElementById('adminBtn').onclick = ()=>{
-  document.getElementById('pwdInput').value='';
+  var p = document.getElementById('pwd');
+  var inp = document.getElementById('pwdInput');
+  inp.value = '';
+  inp.removeAttribute('readonly');
   document.getElementById('pwdErr').style.display='none';
-  document.getElementById('pwd').classList.add('show');
-  setTimeout(()=>document.getElementById('pwdInput').focus(),100);
+  p.style.pointerEvents='auto';
+  p.style.opacity='1';
+  setTimeout(function(){ inp.focus(); }, 100);
 };
+function checkPwd(){
+  var v = document.getElementById('pwdInput').value.trim();
+  if(v === getPwd()){
+    var p = document.getElementById('pwd');
+    p.style.pointerEvents='none';
+    p.style.opacity='0';
+    renderAdminList();
+    document.getElementById('admin').classList.add('show');
+  } else {
+    document.getElementById('pwdErr').style.display='block';
+  }
+}
 function delEgg(i){
   EGGS.splice(i,1);
   saveEggs();
