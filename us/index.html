@@ -549,9 +549,20 @@ tick(); setInterval(tick, 1000);
 startSnowOn('snow-open');
 
 /* ============ Stage 1 → 2 ============ */
-document.getElementById('startBtn').onclick = ()=>{
-  bgm.play();
-  document.getElementById('music').classList.add('on');
+document.getElementById('startBtn').onclick = (e)=>{
+  e.preventDefault();
+  bgm.muted = false;
+  bgm.volume = 1;
+  bgm.play().then(()=>{
+    document.getElementById('music').classList.add('on');
+  }).catch(err=>{
+    console.log('play failed:', err);
+    // 手机端可能需要再点一次
+    document.getElementById('music').onclick = ()=>{
+      bgm.play();
+      document.getElementById('music').classList.add('on');
+    };
+  });
   document.getElementById('stage-open').classList.add('hidden');
   document.getElementById('stage-chat').classList.remove('hidden');
   document.getElementById('menu').classList.add('on');
