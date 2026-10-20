@@ -376,7 +376,7 @@ document.getElementById('music').onclick = ()=>{
   if(bgm.paused){ bgm.play(); document.getElementById('music').classList.add('on'); }
   else { bgm.pause(); document.getElementById('music').classList.remove('on'); }
 };
-const START = new Date(2025,4,20,0,0,0); // 2025-05-20 00:00
+const START = new Date(2025,7,12,0,0,0); // 2025-08-12 00:00
 const timerEl = document.getElementById('timer');
 function pad(n){return String(n).padStart(2,'0');}
 
@@ -458,6 +458,7 @@ document.getElementById('startBtn').onclick = ()=>{
   document.getElementById('music').classList.add('on');
   document.getElementById('stage-open').classList.add('hidden');
   document.getElementById('stage-chat').classList.remove('hidden');
+  document.getElementById('menu').classList.add('on');
   nextLine(0);
 };
 
