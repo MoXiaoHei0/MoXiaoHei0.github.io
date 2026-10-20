@@ -126,6 +126,23 @@
   #egg .body{font-size:13.5px;line-height:2.1;letter-spacing:.05em;color:var(--ink-dim);
     border-top:1px dashed var(--line-soft);padding-top:14px;}
   #egg .body img{max-width:100%;border-radius:10px;margin-top:10px;display:block;}
+  /* 密码弹窗 */
+  #pwd{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:14;
+    width:min(320px,88vw);background:#fff;border-radius:14px;padding:24px;
+    box-shadow:0 30px 80px rgba(70,100,120,.3);
+    opacity:0;pointer-events:none;transition:opacity .3s ease;}
+  #pwd.show{opacity:1;pointer-events:auto;}
+  #pwd h3{font-size:15px;letter-spacing:.2em;color:var(--ink);margin-bottom:14px;text-align:center;}
+  #pwd input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;
+    font-family:var(--sans);font-size:14px;text-align:center;letter-spacing:.3em;margin-bottom:12px;}
+  #pwd .row{display:flex;gap:10px;}
+  #pwd button{flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;font-size:12px;letter-spacing:.2em;}
+  #pwd .ok{background:var(--accent);color:#fff;}
+  #pwd .cancel{background:#eee;color:var(--ink);}
+  #pwd .err{color:#e74c3c;font-size:11px;text-align:center;margin-bottom:8px;display:none;}
+  #admin .changePwd{margin-top:10px;padding:8px;width:100%;border:1px solid var(--line);
+    background:#fff;border-radius:8px;color:var(--accent);cursor:pointer;font-size:11px;letter-spacing:.2em;}
+  #admin .changePwd:hover{background:var(--accent);color:#fff;}
   /* 左上角管理按钮 */
   #adminBtn{position:fixed;top:26px;left:32px;z-index:12;width:30px;height:30px;
     border-radius:50%;background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.5);
@@ -346,6 +363,18 @@
         <button class="save" onclick="saveEgg()">保存</button>
         <button class="cancel" onclick="document.getElementById('adminForm').classList.remove('show')">取消</button>
       </div>
+    </div>
+    <button class="changePwd" onclick="changePwd()">修改密码</button>
+  </div>
+
+  <!-- 密码弹窗 -->
+  <div id="pwd">
+    <h3>🔒 请输入密码</h3>
+    <div class="err" id="pwdErr">密码错误</div>
+    <input type="password" id="pwdInput" placeholder="••••" onkeydown="if(event.key==='Enter')checkPwd()">
+    <div class="row">
+      <button class="ok" onclick="checkPwd()">确定</button>
+      <button class="cancel" onclick="document.getElementById('pwd').classList.remove('show')">取消</button>
     </div>
   </div>
 
@@ -820,6 +849,29 @@ function startLoad(){
 }
 
 /* ============ 管理爱心 ============ */
+function getPwd(){
+  return localStorage.getItem('us_pwd') || '1234';
+}
+function checkPwd(){
+  const v = document.getElementById('pwdInput').value;
+  if(v === getPwd()){
+    document.getElementById('pwd').classList.remove('show');
+    document.getElementById('pwdInput').value='';
+    document.getElementById('pwdErr').style.display='none';
+    renderAdminList();
+    document.getElementById('admin').classList.add('show');
+  } else {
+    document.getElementById('pwdErr').style.display='block';
+  }
+}
+function changePwd(){
+  const oldP = prompt('请输入旧密码：');
+  if(oldP !== getPwd()) return alert('旧密码错误');
+  const newP = prompt('请输入新密码：');
+  if(!newP) return;
+  localStorage.setItem('us_pwd', newP);
+  alert('密码已修改');
+}
 function renderAdminList(){
   const list = document.getElementById('adminList');
   list.innerHTML = '';
@@ -833,8 +885,8 @@ function renderAdminList(){
   });
 }
 document.getElementById('adminBtn').onclick = ()=>{
-  renderAdminList();
-  document.getElementById('admin').classList.add('show');
+  document.getElementById('pwd').classList.add('show');
+  document.getElementById('pwdInput').focus();
 };
 function delEgg(i){
   EGGS.splice(i,1);
