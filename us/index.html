@@ -353,8 +353,8 @@
   <div id="stage-tree" class="hidden">
     <canvas id="ecg"></canvas>
     <div id="stars"></div>
-    <div id="tree-tip">点亮周围的星星，每一颗都是我们的记忆</div>
-    <div id="hint">点一点周围的星星 ✦</div>
+    <div id="tree-tip">点亮属于我们的印记，每一次都是彼此的回忆</div>
+    <div id="hint">点一点周围的爱心 ✦</div>
   </div>
   <canvas id="snow"></canvas>
 
@@ -610,6 +610,10 @@ function goTree(){
     document.body.classList.remove('fadeout');
     const t = document.getElementById('stage-tree');
     t.classList.remove('hidden');
+    document.getElementById('ecg').style.display='block';
+    document.getElementById('stars').style.display='block';
+    document.getElementById('tree-tip').style.display='block';
+    document.getElementById('hint').style.display='block';
     requestAnimationFrame(()=> t.classList.add('on'));
     startECG();
     spawnStars();
@@ -631,6 +635,10 @@ function goChat(){
   closeAllOverlays();
   document.getElementById('stage-tree').classList.remove('on');
   document.getElementById('stage-tree').classList.add('hidden');
+  document.getElementById('ecg').style.display='none';
+  document.getElementById('stars').style.display='none';
+  document.getElementById('tree-tip').style.display='none';
+  document.getElementById('hint').style.display='none';
   document.getElementById('stage-chat').classList.remove('hidden');
   document.getElementById('menu').classList.add('on');
 }
@@ -638,6 +646,10 @@ function goTreeNav(){
   closeAllOverlays();
   document.getElementById('stage-chat').classList.add('hidden');
   document.getElementById('stage-open').classList.add('hidden');
+  document.getElementById('ecg').style.display='block';
+  document.getElementById('stars').style.display='block';
+  document.getElementById('tree-tip').style.display='block';
+  document.getElementById('hint').style.display='block';
   const t = document.getElementById('stage-tree');
   t.classList.remove('hidden');
   requestAnimationFrame(()=> t.classList.add('on'));
