@@ -636,9 +636,14 @@ function startECG(){
     // 画已经扫过的心形
     if(head < pts.length){
       const hx = pts[head].x;
-      for(let cx = P*0.5; cx < hx; cx += P){
-        heart(cx, midY, 55*amp*2);
+    // 只画屏幕正中间一个大心
+    if(head < pts.length){
+      const hx = pts[head].x;
+      const centerX = W/2;
+      if(hx > centerX){
+        heart(centerX, midY, 55*amp*2);
       }
+    }
     }
     // 光点 + 呼唤波纹
     if(head < pts.length){
