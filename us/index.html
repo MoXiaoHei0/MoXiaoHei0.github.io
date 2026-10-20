@@ -568,7 +568,6 @@ function goChat(){
   document.getElementById('stage-tree').classList.add('hidden');
   document.getElementById('stage-chat').classList.remove('hidden');
   document.getElementById('menu').classList.add('on');
-  nextLine(li);
 }
 function goTreeNav(){
   closeAllOverlays();
@@ -577,6 +576,8 @@ function goTreeNav(){
   const t = document.getElementById('stage-tree');
   t.classList.remove('hidden');
   requestAnimationFrame(()=> t.classList.add('on'));
+  startECG();
+  spawnStars();
   document.getElementById('menu').classList.add('on');
 }
 
@@ -635,7 +636,7 @@ function startECG(){
     if(head < pts.length){
       const hx = pts[head].x;
       for(let cx = P*0.5; cx < hx; cx += P){
-        heart(cx, midY, 22*amp);
+        heart(cx, midY, 42*amp);
       }
     }
     // 光点 + 呼唤波纹
