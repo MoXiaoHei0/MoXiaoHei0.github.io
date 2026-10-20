@@ -595,7 +595,7 @@ function startECG(){
   // 预计算 ECG 线的 pts（中间用心形代替平线）
   const pts = [];
   const centerX = W/2;
-  const heartS = 4.5*amp;
+  const heartS = 5.5*amp;
   // 先生成心形上轮廓路径点（从左到右连续，底部在 midY 处切断）
   const heartPath = [];
   // 心形参数方程
