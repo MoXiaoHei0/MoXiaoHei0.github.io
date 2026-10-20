@@ -592,16 +592,17 @@ function startECG(){
   const midY = H*0.5;
   const amp = W < 640 ? 0.55 : 1;
   const P = 220; // 周期
-  // 画一个心形（底部在基线 midY，向上凸）
+  // 画一个心形（底部开口不闭合，向上凸，高度 = ECG尖峰的2倍）
   function heart(cx, baseY, s){
     ctx.beginPath();
-    ctx.moveTo(cx, baseY);
-    // 左半边
-    ctx.bezierCurveTo(cx - s*0.1, baseY - s*0.3, cx - s*0.5, baseY - s*0.25, cx - s*0.5, baseY - s*0.55);
-    ctx.bezierCurveTo(cx - s*0.5, baseY - s*0.9, cx - s*0.15, baseY - s*0.95, cx, baseY - s*0.65);
-    // 右半边
-    ctx.bezierCurveTo(cx + s*0.15, baseY - s*0.95, cx + s*0.5, baseY - s*0.9, cx + s*0.5, baseY - s*0.55);
-    ctx.bezierCurveTo(cx + s*0.5, baseY - s*0.25, cx + s*0.1, baseY - s*0.3, cx, baseY);
+    // 从左边基线上来
+    ctx.moveTo(cx - s*0.6, baseY);
+    // 左半边向上
+    ctx.bezierCurveTo(cx - s*0.6, baseY - s*0.4, cx - s*0.55, baseY - s*0.7, cx - s*0.3, baseY - s*0.75);
+    ctx.bezierCurveTo(cx - s*0.1, baseY - s*0.8, cx - s*0.05, baseY - s*0.6, cx, baseY - s*0.45);
+    // 右半边下来
+    ctx.bezierCurveTo(cx + s*0.05, baseY - s*0.6, cx + s*0.1, baseY - s*0.8, cx + s*0.3, baseY - s*0.75);
+    ctx.bezierCurveTo(cx + s*0.55, baseY - s*0.7, cx + s*0.6, baseY - s*0.4, cx + s*0.6, baseY);
     ctx.stroke();
   }
   // 预计算 ECG 线的 pts（不含心形）
@@ -636,7 +637,7 @@ function startECG(){
     if(head < pts.length){
       const hx = pts[head].x;
       for(let cx = P*0.5; cx < hx; cx += P){
-        heart(cx, midY, 42*amp);
+        heart(cx, midY, 55*amp*2);
       }
     }
     // 光点 + 呼唤波纹
