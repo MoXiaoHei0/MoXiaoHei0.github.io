@@ -885,8 +885,10 @@ function renderAdminList(){
   });
 }
 document.getElementById('adminBtn').onclick = ()=>{
+  document.getElementById('pwdInput').value='';
+  document.getElementById('pwdErr').style.display='none';
   document.getElementById('pwd').classList.add('show');
-  document.getElementById('pwdInput').focus();
+  setTimeout(()=>document.getElementById('pwdInput').focus(),100);
 };
 function delEgg(i){
   EGGS.splice(i,1);
