@@ -716,8 +716,8 @@ function startECG(){
   const centerX = W/2;
   // 先生成心形上轮廓路径点（从左到右连续，底部在 midY 处切断）
   const heartPath = [];
-  const heartSX = 6.5*amp;  // 水平缩放
-  const heartSY = 8*amp;   // 垂直缩放
+  const heartSX = 6.5;  // 水平缩放（手机端也固定）
+  const heartSY = 8;   // 垂直缩放（手机端也固定）
   // 心形参数方程
   function heartXY(t){
     const hx = 16*Math.pow(Math.sin(t),3);
