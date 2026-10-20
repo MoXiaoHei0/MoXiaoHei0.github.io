@@ -626,17 +626,18 @@ function startECG(){
     }
     ctx.stroke();
     ctx.shadowBlur=0;
-    // 画心形（贝塞尔，底部开口在 midY）
+    // 画完整心形（底部1/8被切掉，开口在 midY）
     if(head < pts.length && pts[head].x > centerX){
+      const s = 3.2*amp; // 心形大小
       ctx.beginPath();
-      ctx.moveTo(centerX - heartW, midY);
-      // 左半弧
-      ctx.bezierCurveTo(centerX - heartW, midY - 40*amp, centerX - heartW*0.6, midY - 65*amp, centerX - heartW*0.25, midY - 55*amp);
-      // 中间凹
-      ctx.bezierCurveTo(centerX - heartW*0.1, midY - 48*amp, centerX - heartW*0.05, midY - 45*amp, centerX, midY - 42*amp);
-      // 右半弧
-      ctx.bezierCurveTo(centerX + heartW*0.05, midY - 45*amp, centerX + heartW*0.1, midY - 48*amp, centerX + heartW*0.25, midY - 55*amp);
-      ctx.bezierCurveTo(centerX + heartW*0.6, midY - 65*amp, centerX + heartW, midY - 40*amp, centerX + heartW, midY);
+      // 从左基线上来
+      ctx.moveTo(centerX - 16*s, midY - 4*s);
+      // 左半边
+      ctx.bezierCurveTo(centerX - 16*s, midY - 10*s, centerX - 8*s, midY - 16*s, centerX, midY - 8*s);
+      ctx.bezierCurveTo(centerX + 8*s, midY - 16*s, centerX + 16*s, midY - 10*s, centerX + 16*s, midY - 4*s);
+      // 右半边下来到尖
+      ctx.bezierCurveTo(centerX + 16*s, midY + 2*s, centerX + 8*s, midY + 6*s, centerX, midY + 12*s);
+      ctx.bezierCurveTo(centerX - 8*s, midY + 6*s, centerX - 16*s, midY + 2*s, centerX - 16*s, midY - 4*s);
       ctx.strokeStyle = 'rgba(255,255,255,.95)';
       ctx.lineWidth = 1.5;
       ctx.shadowColor='rgba(255,255,255,1)';ctx.shadowBlur=12;
