@@ -151,22 +151,22 @@
     font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.8);white-space:nowrap;
     font-family:var(--sans);-webkit-text-stroke:0;}
   /* 底部彩蛋目录 */
-  #menu{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:8;
-    display:flex;gap:8px;opacity:0;pointer-events:none;transition:opacity .8s ease;}
+  #menu{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:8;
+    display:flex;gap:6px;opacity:0;pointer-events:none;transition:opacity .8s ease;}
   #menu.on{opacity:1;pointer-events:auto;}
-  #menu button{padding:8px 16px;background:rgba(255,255,255,.25);
-    border:1px solid rgba(255,255,255,.4);border-radius:99px;color:#fff;
-    font-family:var(--sans);font-size:11px;letter-spacing:.2em;cursor:pointer;
-    backdrop-filter:blur(8px);transition:all .3s ease;}
-  #menu button:hover{background:rgba(255,255,255,.5);}
+  #menu button{padding:6px 14px;background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.3);border-radius:99px;color:rgba(255,255,255,.85);
+    font-family:var(--sans);font-size:10px;letter-spacing:.15em;cursor:pointer;
+    backdrop-filter:blur(6px);transition:all .3s ease;}
+  #menu button:hover{background:rgba(255,255,255,.4);}
   @keyframes starPop{
     0%{transform:scale(.5);}
     50%{transform:scale(1.5);}
     100%{transform:scale(1);}
   }
-  #tree-tip{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
-    font-family:var(--sans);font-size:9px;letter-spacing:.4em;color:rgba(255,255,255,.8);
-    text-transform:uppercase;z-index:6;text-shadow:0 1px 8px rgba(122,142,161,.4);}
+  #tree-tip{position:fixed;bottom:52px;left:50%;transform:translateX(-50%);
+    font-family:var(--sans);font-size:9px;letter-spacing:.4em;color:rgba(255,255,255,.7);
+    text-transform:uppercase;z-index:6;text-shadow:0 1px 8px rgba(122,142,161,.4);white-space:nowrap;}
   #hint{position:fixed;left:50%;top:65%;transform:translate(-50%,-50%);z-index:6;
     font-family:var(--serif);font-size:15px;letter-spacing:.3em;color:#fff;
     text-shadow:0 2px 12px rgba(122,142,161,.6);
