@@ -595,31 +595,42 @@ function startECG(){
   // 预计算 ECG 线的 pts（中间夹一个心形，心形就是线本身）
   const pts = [];
   const centerX = W/2;
-  const heartW = 80*amp; // 心形半宽
-  const heartH = 70*amp; // 心形高度
+  const heartScale = 3.5*amp; // 心形大小
+  // 用心形参数方程生成心形点（只取上半，切掉底部1/8）
+  const heartPts = [];
+  for(let t=0; t<=Math.PI*2; t+=0.02){
+    const hx = 16*Math.pow(Math.sin(t),3);
+    const hy = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+    heartPts.push({x:hx, y:hy});
+  }
+  // 找 y 的范围，切掉底部1/8
+  const ys = heartPts.map(p=>p.y);
+  const yMin = Math.min(...ys), yMax = Math.max(...ys);
+  const cutoff = yMin + (yMax-yMin)/8; // 切掉底部1/8
+  const clippedHeart = heartPts.filter(p=>p.y >= cutoff);
+  // 把心形映射到屏幕：中心在 centerX，底部在 midY
+  // 心形原始 x 范围 [-16,16]，y 范围 [yMin, yMax]
+  const heartScreenW = 32 * heartScale; // 心形总宽
+  const heartStartX = centerX - heartScreenW/2;
+  const heartEndX = centerX + heartScreenW/2;
+  // 预生成心形的 (x,y) 映射
+  const heartMap = clippedHeart.map(p=>{
+    const sx = heartStartX + ((p.x + 16)/32) * heartScreenW;
+    const sy = midY - (p.y - yMin) * heartScale;
+    return {x:sx, y:sy};
+  });
+
   for(let x=0;x<=W;x+=2){
     let y = midY;
-    const dx = x - centerX;
     // 在心形范围内
-    if(Math.abs(dx) < heartW){
-      // 心形上半：用心形曲线 y = 11sin³(t) 那种，但只取上半
-      // 简化：心形轮廓的上半，从左到右
-      const t = (dx + heartW) / (heartW*2); // 0~1
-      // 心形方程：两个圆顶
-      // 左半：从0到0.5，右半：0.5到1
-      if(t < 0.5){
-        // 左半：从基线升到左顶
-        const lt = t*2; // 0~1
-        y = midY - Math.sin(lt*Math.PI*0.8) * heartH;
-      } else {
-        // 右半：从右顶降到基线
-        const rt = (t-0.5)*2; // 0~1
-        y = midY - Math.sin((1-rt)*Math.PI*0.8) * heartH;
+    if(x >= heartMap[0].x && x <= heartMap[heartMap.length-1].x){
+      // 找最近的心形点
+      let best = heartMap[0], bestD = 999;
+      for(const hp of heartMap){
+        const d = Math.abs(hp.x - x);
+        if(d < bestD){ bestD = d; best = hp; }
       }
-      // 中间凹（心形的谷）
-      if(t > 0.4 && t < 0.6){
-        y += 25*amp;
-      }
+      y = best.y;
     } else {
       const phase = (x % P) / P;
       if(phase < 0.08) y = midY - 8*amp*Math.sin(phase/0.08*Math.PI);
