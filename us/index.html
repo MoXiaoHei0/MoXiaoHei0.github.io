@@ -635,6 +635,8 @@ function startECG(){
     else if(phase < 0.27) y = midY + 16*amp;
     else if(phase < 0.35) y = midY;
     else if(phase > 0.65) y = midY - 10*amp*Math.sin((phase-0.65)/0.08*Math.PI);
+    // 靠近心形时强制回到水平，避免尖角
+    if(x > heartStartX - 30) y = midY;
     pts.push({x,y});
   }
   // 插入心形路径
@@ -650,6 +652,8 @@ function startECG(){
     else if(phase < 0.27) y = midY + 16*amp;
     else if(phase < 0.35) y = midY;
     else if(phase > 0.65) y = midY - 10*amp*Math.sin((phase-0.65)/0.08*Math.PI);
+    // 刚离开心形时保持水平，避免尖角
+    if(x < heartEndX + 30) y = midY;
     pts.push({x,y});
   }
   let head = 0; // 当前画到 pts 的第几个
