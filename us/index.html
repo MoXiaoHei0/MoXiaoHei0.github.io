@@ -275,7 +275,7 @@
     <canvas id="snow-open"></canvas>
     <div class="lbl">我们已经认识</div>
     <div class="date" id="timer"></div>
-    <div class="sub">从2025年5月20日起，我们的一切，刻在了时间里。</div>
+    <div class="sub">从2025年8月12日起，我们的一切，刻在了时间里。</div>
     <button class="start" id="startBtn">打 开</button>
   </div>
 
@@ -307,8 +307,8 @@
   <!-- 底部界面导航 -->
   <div id="menu">
     <button onclick="goChat()">聊 天</button>
-    <button onclick="goTree()">心 跳</button>
-    <button onclick="showAsk()">信 封</button>
+    <button onclick="goTreeNav()">心 跳</button>
+    <button onclick="closeAllOverlays();showAsk()">信 封</button>
   </div>
 
   <!-- 模糊遮罩 -->
@@ -339,7 +339,7 @@
     <h2>写给你</h2>
     <div class="divider"><span>✦</span></div>
     <div class="letter">
-      <p>从 2025 年 5 月 20 日到今天，</p>
+      <p>从 2025 年 8 月 12 日到今天，</p>
       <p>我数过我们一起走过的每一个日子，<br>数到后来就不想数了——<br>因为往后还很长，我想慢慢和你过。</p>
       <p>这棵树上的每一颗星，<br>都是我偷偷记下的、关于你的瞬间。</p>
       <p>以后的每一场雪，<br>我都想和你一起站着看完。</p>
@@ -555,14 +555,29 @@ function goTree(){
 startSnowOn('snow');
 
 /* 界面导航 */
+function closeAllOverlays(){
+  document.getElementById('blurMask').classList.remove('on');
+  document.getElementById('ask').classList.remove('show');
+  document.getElementById('loading').classList.remove('show');
+  document.getElementById('final').classList.remove('show');
+  document.getElementById('egg').classList.remove('show');
+}
 function goChat(){
+  closeAllOverlays();
   document.getElementById('stage-tree').classList.remove('on');
   document.getElementById('stage-tree').classList.add('hidden');
   document.getElementById('stage-chat').classList.remove('hidden');
   document.getElementById('menu').classList.add('on');
-  document.getElementById('blurMask').classList.remove('on');
-  document.getElementById('ask').classList.remove('show');
-  nextLine(0);
+  nextLine(li);
+}
+function goTreeNav(){
+  closeAllOverlays();
+  document.getElementById('stage-chat').classList.add('hidden');
+  document.getElementById('stage-open').classList.add('hidden');
+  const t = document.getElementById('stage-tree');
+  t.classList.remove('hidden');
+  requestAnimationFrame(()=> t.classList.add('on'));
+  document.getElementById('menu').classList.add('on');
 }
 
 /* ECG 波形：光点从左往右画，拖尾发光 */
@@ -576,14 +591,16 @@ function startECG(){
   const midY = H*0.5;
   const amp = W < 640 ? 0.55 : 1;
   const P = 220; // 周期
-  // 画一个心形（cx 中心 x，cy 中心 y，s 大小）
-  function heart(cx, cy, s){
+  // 画一个心形（底部在基线 midY，向上凸）
+  function heart(cx, baseY, s){
     ctx.beginPath();
-    ctx.moveTo(cx, cy + s*0.3);
-    ctx.bezierCurveTo(cx, cy, cx - s*0.5, cy - s*0.2, cx - s*0.5, cy + s*0.15);
-    ctx.bezierCurveTo(cx - s*0.5, cy + s*0.55, cx, cy + s*0.8, cx, cy + s*1);
-    ctx.bezierCurveTo(cx, cy + s*0.8, cx + s*0.5, cy + s*0.55, cx + s*0.5, cy + s*0.15);
-    ctx.bezierCurveTo(cx + s*0.5, cy - s*0.2, cx, cy, cx, cy + s*0.3);
+    ctx.moveTo(cx, baseY);
+    // 左半边
+    ctx.bezierCurveTo(cx - s*0.1, baseY - s*0.3, cx - s*0.5, baseY - s*0.25, cx - s*0.5, baseY - s*0.55);
+    ctx.bezierCurveTo(cx - s*0.5, baseY - s*0.9, cx - s*0.15, baseY - s*0.95, cx, baseY - s*0.65);
+    // 右半边
+    ctx.bezierCurveTo(cx + s*0.15, baseY - s*0.95, cx + s*0.5, baseY - s*0.9, cx + s*0.5, baseY - s*0.55);
+    ctx.bezierCurveTo(cx + s*0.5, baseY - s*0.25, cx + s*0.1, baseY - s*0.3, cx, baseY);
     ctx.stroke();
   }
   // 预计算 ECG 线的 pts（不含心形）
@@ -618,7 +635,7 @@ function startECG(){
     if(head < pts.length){
       const hx = pts[head].x;
       for(let cx = P*0.5; cx < hx; cx += P){
-        heart(cx, midY - 2*amp, 18*amp);
+        heart(cx, midY, 22*amp);
       }
     }
     // 光点 + 呼唤波纹
