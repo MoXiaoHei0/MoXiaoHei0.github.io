@@ -598,16 +598,13 @@ function startECG(){
   const heartW = 60*amp; // 心形宽度
   for(let x=0;x<=W;x+=2){
     let y = midY;
-    // 在心形范围内
+    // 在心形范围内：两个圆丘，中间凹下去
     if(Math.abs(x - centerX) < heartW){
-      // 心形上轮廓：开口向上，底部在基线上
       const t = (x - (centerX - heartW)) / (heartW*2); // 0~1
-      // 用贝塞尔近似心形上半
-      y = midY - Math.sin(t*Math.PI) * 55*amp*1.5;
-      // 顶部加个凹（心形的双弧）
-      if(t > 0.35 && t < 0.65){
-        y += Math.sin((t-0.35)/0.3*Math.PI) * 15*amp;
-      }
+      // 左丘和右丘各一个高斯峰，中间凹
+      const leftPeak = Math.exp(-Math.pow((t-0.25)/0.18, 2));
+      const rightPeak = Math.exp(-Math.pow((t-0.75)/0.18, 2));
+      y = midY - (leftPeak + rightPeak) * 80*amp;
     } else {
       const phase = (x % P) / P;
       if(phase < 0.08) y = midY - 8*amp*Math.sin(phase/0.08*Math.PI);
