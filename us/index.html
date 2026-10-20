@@ -144,6 +144,21 @@
   .star.lit{color:#fff;-webkit-text-stroke:1.5px #fff;
     text-shadow:0 0 16px rgba(255,255,255,.9),0 0 40px rgba(255,255,255,.7);
     animation:starPop .6s ease;font-size:30px;}
+  .star.special{font-size:32px;color:rgba(255,255,255,.85);
+    -webkit-text-stroke:1px #fff;cursor:pointer;
+    text-shadow:0 0 20px rgba(255,255,255,.8);}
+  .star.special .sign{position:absolute;top:130%;left:50%;transform:translateX(-50%);
+    font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.8);white-space:nowrap;
+    font-family:var(--sans);-webkit-text-stroke:0;}
+  /* 底部彩蛋目录 */
+  #menu{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:8;
+    display:flex;gap:8px;opacity:0;pointer-events:none;transition:opacity .8s ease;}
+  #menu.on{opacity:1;pointer-events:auto;}
+  #menu button{padding:8px 16px;background:rgba(255,255,255,.25);
+    border:1px solid rgba(255,255,255,.4);border-radius:99px;color:#fff;
+    font-family:var(--sans);font-size:11px;letter-spacing:.2em;cursor:pointer;
+    backdrop-filter:blur(8px);transition:all .3s ease;}
+  #menu button:hover{background:rgba(255,255,255,.5);}
   @keyframes starPop{
     0%{transform:scale(.5);}
     50%{transform:scale(1.5);}
@@ -283,6 +298,14 @@
     <div id="hint">点一点周围的星星 ✦</div>
   </div>
   <canvas id="snow"></canvas>
+
+  <!-- 底部彩蛋目录 -->
+  <div id="menu">
+    <button onclick="openEgg(0)">第一次</button>
+    <button onclick="openEgg(1)">那天的风</button>
+    <button onclick="openEgg(2)">想你的时候</button>
+    <button onclick="openEgg(3)">以后</button>
+  </div>
 
   <!-- 模糊遮罩 -->
   <div id="blurMask"></div>
@@ -520,6 +543,7 @@ function goTree(){
     requestAnimationFrame(()=> t.classList.add('on'));
     startECG();
     spawnStars();
+    document.getElementById('menu').classList.add('on');
   }, 1600);
 }
 // 全程飘雪
@@ -589,7 +613,7 @@ function startECG(){
   })(0);
 }
 
-/* 星点 */
+/* 星点（爱心） */
 function spawnStars(){
   const wrap = document.getElementById('stars');
   wrap.innerHTML = '';
@@ -598,21 +622,28 @@ function spawnStars(){
   for(let i=0;i<totalStars;i++){
     const s = document.createElement('div');
     s.className = 'star';
-    s.textContent = '✦';
+    s.textContent = '❤';
     s.style.left = (8 + Math.random()*84) + '%';
-    s.style.top = (15 + Math.random()*65) + '%';
+    s.style.top = (18 + Math.random()*60) + '%';
     s.style.animationDelay = (Math.random()*4)+'s';
     s.onclick = ()=>{
       if(s.classList.contains('lit')) return;
       s.classList.add('lit');
       litCount++;
       document.getElementById('hint').style.display = 'none';
-      // 弹对应彩蛋卡（12颗对应4个彩蛋，循环）
       openEgg(i % EGGS.length);
-      // 全亮后等彩蛋收起再弹询问
     };
     wrap.appendChild(s);
   }
+  // 留一颗星星 ✦ 在居中偏上，署名"最可爱的"
+  const sx = document.createElement('div');
+  sx.className = 'star special';
+  sx.innerHTML = '✦<span class="sign">最可爱的</span>';
+  sx.style.left = '50%';
+  sx.style.top = '20%';
+  sx.style.transform = 'translateX(-50%)';
+  sx.onclick = ()=> openEgg(3);
+  wrap.appendChild(sx);
 }
 
 /* 询问弹窗 */
