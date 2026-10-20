@@ -81,7 +81,11 @@
 
   /* ---------- Stage 2 · 对话（聊天记录流） ---------- */
   #stage-chat{position:fixed;inset:0;z-index:3;display:flex;flex-direction:column;
-    justify-content:flex-end;padding:6vh 6vw 10vh;overflow:hidden;}
+    justify-content:flex-end;padding:6vh 6vw 12vh;overflow:hidden;}
+  #chatTip{position:fixed;left:50%;bottom:52px;transform:translateX(-50%);
+    font-family:var(--sans);font-size:10px;letter-spacing:.4em;color:rgba(255,255,255,.6);
+    animation:tipBlink 2s ease-in-out infinite;z-index:4;}
+  @keyframes tipBlink{0%,100%{opacity:.4;}50%{opacity:1;}}
   #chatLog{display:flex;flex-direction:column;gap:16px;max-width:680px;width:100%;
     margin:0 auto;overflow-y:auto;}
   #chatLog::-webkit-scrollbar{display:none;}
@@ -279,6 +283,7 @@
   <div id="stage-chat" class="hidden">
     <div id="chatLog"></div>
     <div id="choices"></div>
+    <div id="chatTip">点 屏 幕 继 续</div>
   </div>
 
   <!-- 彩蛋 -->
@@ -299,12 +304,11 @@
   </div>
   <canvas id="snow"></canvas>
 
-  <!-- 底部彩蛋目录 -->
+  <!-- 底部界面导航 -->
   <div id="menu">
-    <button onclick="openEgg(0)">第一次</button>
-    <button onclick="openEgg(1)">那天的风</button>
-    <button onclick="openEgg(2)">想你的时候</button>
-    <button onclick="openEgg(3)">以后</button>
+    <button onclick="goChat()">聊 天</button>
+    <button onclick="goTree()">心 跳</button>
+    <button onclick="showAsk()">信 封</button>
   </div>
 
   <!-- 模糊遮罩 -->
@@ -546,8 +550,19 @@ function goTree(){
     document.getElementById('menu').classList.add('on');
   }, 1600);
 }
-// 全程飘雪
+/* 全程飘雪 */
 startSnowOn('snow');
+
+/* 界面导航 */
+function goChat(){
+  document.getElementById('stage-tree').classList.remove('on');
+  document.getElementById('stage-tree').classList.add('hidden');
+  document.getElementById('stage-chat').classList.remove('hidden');
+  document.getElementById('menu').classList.add('on');
+  document.getElementById('blurMask').classList.remove('on');
+  document.getElementById('ask').classList.remove('show');
+  nextLine(0);
+}
 
 /* ECG 波形：光点从左往右画，拖尾发光 */
 function startECG(){
@@ -558,20 +573,31 @@ function startECG(){
   ctx.setTransform(DPR,0,0,DPR,0,0);
   const W = innerWidth, H = innerHeight;
   const midY = H*0.5;
-  // 预计算整屏波形点
   const amp = W < 640 ? 0.55 : 1;
+  const P = 220; // 周期
+  // 画一个心形（cx 中心 x，cy 中心 y，s 大小）
+  function heart(cx, cy, s){
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + s*0.3);
+    ctx.bezierCurveTo(cx, cy, cx - s*0.5, cy - s*0.2, cx - s*0.5, cy + s*0.15);
+    ctx.bezierCurveTo(cx - s*0.5, cy + s*0.55, cx, cy + s*0.8, cx, cy + s*1);
+    ctx.bezierCurveTo(cx, cy + s*0.8, cx + s*0.5, cy + s*0.55, cx + s*0.5, cy + s*0.15);
+    ctx.bezierCurveTo(cx + s*0.5, cy - s*0.2, cx, cy, cx, cy + s*0.3);
+    ctx.stroke();
+  }
+  // 预计算 ECG 线的 pts（不含心形）
   const pts = [];
   for(let x=0;x<=W;x+=2){
-    const phase = (x % 140) / 140;
+    const phase = (x % P) / P;
     let y = midY;
-    if(phase < 0.1) y = midY - 6*amp*Math.sin(phase/0.1*Math.PI);
-    else if(phase < 0.2) y = midY;
-    else if(phase < 0.23) y = midY + 6*amp;
-    else if(phase < 0.28) y = midY - 55*amp;
-    else if(phase < 0.32) y = midY + 14*amp;
-    else if(phase < 0.5) y = midY;
-    else if(phase < 0.75) y = midY - 12*amp*Math.sin((phase-0.5)/0.25*Math.PI);
-    else y = midY;
+    if(phase < 0.08) y = midY - 8*amp*Math.sin(phase/0.08*Math.PI);
+    else if(phase < 0.18) y = midY;
+    else if(phase < 0.20) y = midY + 8*amp;
+    else if(phase < 0.24) y = midY - 55*amp;
+    else if(phase < 0.27) y = midY + 16*amp;
+    else if(phase < 0.35) y = midY;
+    else if(phase > 0.65) y = midY - 10*amp*Math.sin((phase-0.65)/0.08*Math.PI);
+    else y = midY; // 心形区域，线平着过
     pts.push({x,y});
   }
   let head = 0; // 当前画到 pts 的第几个
@@ -587,6 +613,13 @@ function startECG(){
     }
     ctx.stroke();
     ctx.shadowBlur=0;
+    // 画已经扫过的心形
+    if(head < pts.length){
+      const hx = pts[head].x;
+      for(let cx = P*0.5; cx < hx; cx += P){
+        heart(cx, midY - 2*amp, 18*amp);
+      }
+    }
     // 光点 + 呼唤波纹
     if(head < pts.length){
       const p = pts[head];
