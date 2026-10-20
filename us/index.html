@@ -125,6 +125,42 @@
     text-transform:uppercase;margin-bottom:14px;}
   #egg .body{font-size:13.5px;line-height:2.1;letter-spacing:.05em;color:var(--ink-dim);
     border-top:1px dashed var(--line-soft);padding-top:14px;}
+  #egg .body img{max-width:100%;border-radius:10px;margin-top:10px;display:block;}
+  /* 左上角管理按钮 */
+  #adminBtn{position:fixed;top:26px;left:32px;z-index:12;width:30px;height:30px;
+    border-radius:50%;background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.5);
+    color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(6px);transition:.3s;}
+  #adminBtn:hover{background:rgba(255,255,255,.5);}
+  /* 管理面板 */
+  #admin{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:13;
+    width:min(500px,92vw);max-height:80vh;background:#fff;border-radius:14px;
+    box-shadow:0 30px 80px rgba(70,100,120,.3);padding:24px;
+    opacity:0;pointer-events:none;transition:opacity .4s ease;overflow-y:auto;}
+  #admin.show{opacity:1;pointer-events:auto;}
+  #admin h3{font-size:16px;letter-spacing:.2em;color:var(--ink);margin-bottom:14px;}
+  #admin .list{display:flex;flex-direction:column;gap:10px;}
+  #admin .item{display:flex;align-items:center;gap:10px;padding:10px;
+    background:#f7f9fb;border-radius:10px;}
+  #admin .item .info{flex:1;min-width:0;}
+  #admin .item .info .t{font-size:13px;color:var(--ink);font-weight:600;}
+  #admin .item .info .b{font-size:11px;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #admin .item img{width:40px;height:40px;border-radius:6px;object-fit:cover;}
+  #admin .item button{padding:4px 10px;border:none;border-radius:6px;background:#e74c3c;
+    color:#fff;font-size:11px;cursor:pointer;}
+  #admin .addBtn{margin-top:14px;padding:10px;width:100%;border:1px dashed var(--line);
+    background:transparent;border-radius:10px;color:var(--accent);cursor:pointer;font-size:12px;letter-spacing:.2em;}
+  #admin .form{margin-top:14px;display:none;flex-direction:column;gap:10px;}
+  #admin .form.show{display:flex;}
+  #admin .form input,#admin .form textarea{padding:10px;border:1px solid var(--line);
+    border-radius:8px;font-family:var(--sans);font-size:13px;color:var(--ink);}
+  #admin .form textarea{resize:vertical;min-height:60px;}
+  #admin .form .row{display:flex;gap:10px;}
+  #admin .form .row button{flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;font-size:12px;letter-spacing:.2em;}
+  #admin .form .save{background:var(--accent);color:#fff;}
+  #admin .form .cancel{background:#eee;color:var(--ink);}
+  #admin .closeBtn{position:absolute;top:12px;right:16px;background:none;border:none;
+    font-size:18px;color:var(--ink-dim);cursor:pointer;}
   #egg .back{margin-top:16px;width:100%;padding:10px 0;border-radius:999px;border:none;
     background:var(--accent);color:#fff;font-family:var(--serif);font-size:11px;
     letter-spacing:.4em;cursor:pointer;}
@@ -263,6 +299,7 @@
 <body>
   <div id="bg"></div>
   <div class="corner" id="tl">No. Us — 2025.08.12</div>
+  <button id="adminBtn" title="管理爱心">✎</button>
 
   <div id="music">
     <div class="disc"></div>
@@ -293,6 +330,23 @@
     <div class="en" id="eggEn"></div>
     <div class="body" id="eggBody"></div>
     <button class="back" id="eggBack">收 起</button>
+  </div>
+
+  <!-- 管理面板 -->
+  <div id="admin">
+    <button class="closeBtn" onclick="document.getElementById('admin').classList.remove('show')">×</button>
+    <h3>❤ 管理爱心故事</h3>
+    <div class="list" id="adminList"></div>
+    <button class="addBtn" onclick="document.getElementById('adminForm').classList.add('show')">＋ 添加新爱心</button>
+    <div class="form" id="adminForm">
+      <input id="fTitle" placeholder="标题，比如：第一次">
+      <textarea id="fBody" placeholder="故事内容..."></textarea>
+      <input type="file" id="fImg" accept="image/*">
+      <div class="row">
+        <button class="save" onclick="saveEgg()">保存</button>
+        <button class="cancel" onclick="document.getElementById('adminForm').classList.remove('show')">取消</button>
+      </div>
+    </div>
   </div>
 
   <!-- Stage 3 · 心电图 + 星点 -->
@@ -359,7 +413,7 @@ const SCRIPT = [
   {side:"me",  who:"你", t:"那我也挂一个。你翻翻看，每一点都是我认真记下来的东西。"},
   {side:"you", who:"她", t:"看完了吗。那……这棵树，我们一起养着。", end:true},
 ];
-const EGGS = [
+const DEFAULT_EGGS = [
   {k:"Egg 01", title:"第一次", en:"The First",
    body:"你说你紧张到打了又删、删了又打。其实我也是。那句“在吗”我截了图，存到现在。"},
   {k:"Egg 02", title:"那天的风", en:"The Wind",
@@ -369,6 +423,17 @@ const EGGS = [
   {k:"Egg 04", title:"以后", en:"From Now On",
    body:"不想做什么惊天动地的事，就想每天都能跟你说一句：今天也见到你了，真好。"},
 ];
+function loadEggs(){
+  try{
+    const s = localStorage.getItem('us_eggs');
+    if(s) return JSON.parse(s);
+  }catch(e){}
+  return DEFAULT_EGGS.slice();
+}
+function saveEggs(){
+  localStorage.setItem('us_eggs', JSON.stringify(EGGS));
+}
+let EGGS = loadEggs();
 
 /* ============ Stage 1 · 计时器（数字抽片）+ 飘雪 ============ */
 const bgm = document.getElementById('bgm');
@@ -518,9 +583,9 @@ function openEgg(idx){
   currentEgg = idx;
   const e = EGGS[idx];
   document.getElementById('eggTitle').textContent = e.title;
-  document.getElementById('eggEn').textContent = e.en;
-  document.getElementById('eggBody').textContent = e.body;
-  document.querySelector('#egg .k').textContent = e.k;
+  document.getElementById('eggEn').textContent = e.en || '';
+  document.getElementById('eggBody').innerHTML = e.body + (e.img ? `<img src="${e.img}" alt="">` : '');
+  document.querySelector('#egg .k').textContent = e.k || ('Egg ' + String(idx+1).padStart(2,'0'));
   egg.classList.add('show');
 }
 document.getElementById('eggBack').onclick = ()=>{
@@ -700,7 +765,7 @@ function spawnStars(){
   const wrap = document.getElementById('stars');
   wrap.innerHTML = '';
   litCount = 0;
-  totalStars = 12;
+  totalStars = EGGS.length;
   for(let i=0;i<totalStars;i++){
     const s = document.createElement('div');
     s.className = 'star';
@@ -713,7 +778,7 @@ function spawnStars(){
       s.classList.add('lit');
       litCount++;
       document.getElementById('hint').style.display = 'none';
-      openEgg(i % EGGS.length);
+      openEgg(i);
     };
     wrap.appendChild(s);
   }
@@ -740,6 +805,60 @@ function startLoad(){
     document.getElementById('loading').classList.remove('show');
     document.getElementById('final').classList.add('show');
   }, 2500);
+}
+
+/* ============ 管理爱心 ============ */
+function renderAdminList(){
+  const list = document.getElementById('adminList');
+  list.innerHTML = '';
+  EGGS.forEach((e,i)=>{
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = (e.img ? `<img src="${e.img}">` : '') +
+      `<div class="info"><div class="t">${e.title}</div><div class="b">${e.body.slice(0,30)}</div></div>` +
+      `<button onclick="delEgg(${i})">删除</button>`;
+    list.appendChild(div);
+  });
+}
+document.getElementById('adminBtn').onclick = ()=>{
+  renderAdminList();
+  document.getElementById('admin').classList.add('show');
+};
+function delEgg(i){
+  EGGS.splice(i,1);
+  saveEggs();
+  renderAdminList();
+  spawnStars();
+}
+function saveEgg(){
+  const title = document.getElementById('fTitle').value.trim();
+  const body = document.getElementById('fBody').value.trim();
+  if(!title || !body) return alert('标题和内容必填');
+  const file = document.getElementById('fImg').files[0];
+  const newEgg = {k:'Egg '+String(EGGS.length+1).padStart(2,'0'), title, en:'', body};
+  if(file){
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      newEgg.img = e.target.result;
+      EGGS.push(newEgg);
+      saveEggs();
+      document.getElementById('adminForm').classList.remove('show');
+      document.getElementById('fTitle').value='';
+      document.getElementById('fBody').value='';
+      document.getElementById('fImg').value='';
+      renderAdminList();
+      spawnStars();
+    };
+    reader.readAsDataURL(file);
+  } else {
+    EGGS.push(newEgg);
+    saveEggs();
+    document.getElementById('adminForm').classList.remove('show');
+    document.getElementById('fTitle').value='';
+    document.getElementById('fBody').value='';
+    renderAdminList();
+    spawnStars();
+  }
 }
 
 function startSnowOn(cvsId){
