@@ -262,7 +262,7 @@
 </head>
 <body>
   <div id="bg"></div>
-  <div class="corner" id="tl">No. Us — 2025.05.20</div>
+  <div class="corner" id="tl">No. Us — 2025.08.12</div>
 
   <div id="music">
     <div class="disc"></div>
@@ -612,7 +612,6 @@ function startECG(){
   }
 
   // 构建完整 pts：先 ECG 左半，再心形路径，再 ECG 右半
-  const pts = [];
   const heartStartX = heartPath[0].x;
   const heartEndX = heartPath[heartPath.length-1].x;
   for(let x=0;x<heartStartX;x+=2){
