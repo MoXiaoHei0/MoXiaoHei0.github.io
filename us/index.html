@@ -171,9 +171,10 @@
     background:transparent;border-radius:10px;color:var(--accent);cursor:pointer;font-size:12px;letter-spacing:.2em;}
   #admin .form{margin-top:14px;display:none;flex-direction:column;gap:10px;}
   #admin .form.show{display:flex;}
-  #admin .form input,#admin .form textarea{padding:10px;border:1px solid var(--line);
-    border-radius:8px;font-family:var(--sans);font-size:13px;color:var(--ink);}
+  #admin .form input,#admin .form textarea,#admin .form select{padding:10px;border:1px solid var(--line);
+    border-radius:8px;font-family:var(--sans);font-size:13px;color:var(--ink);background:#fff;}
   #admin .form textarea{resize:vertical;min-height:60px;}
+  #admin .form select{cursor:pointer;}
   #admin .form .row{display:flex;gap:10px;}
   #admin .form .row button{flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;font-size:12px;letter-spacing:.2em;}
   #admin .form .save{background:var(--accent);color:#fff;}
@@ -318,7 +319,7 @@
 <body>
   <div id="bg"></div>
   <div class="corner" id="tl">No. Us — 2025.08.12</div>
-  <button id="adminBtn" title="管理爱心">✎</button>
+  <button id="adminBtn" title="管理" style="display:none">✎</button>
 
   <div id="music">
     <div class="disc"></div>
@@ -354,18 +355,52 @@
   <!-- 管理面板 -->
   <div id="admin">
     <button class="closeBtn" onclick="document.getElementById('admin').classList.remove('show')">×</button>
-    <h3>❤ 管理爱心故事</h3>
-    <div class="list" id="adminList"></div>
-    <button class="addBtn" onclick="document.getElementById('adminForm').classList.add('show')">＋ 添加新爱心</button>
-    <div class="form" id="adminForm">
-      <input id="fTitle" placeholder="标题，比如：第一次">
-      <textarea id="fBody" placeholder="故事内容..."></textarea>
-      <input type="file" id="fImg" accept="image/*">
-      <div class="row">
-        <button class="save" onclick="saveEgg()">保存</button>
-        <button class="cancel" onclick="document.getElementById('adminForm').classList.remove('show')">取消</button>
+    <h3 id="adminTitle">❤ 管理爱心故事</h3>
+
+    <!-- 聊天管理 -->
+    <div id="adminChat" style="display:none">
+      <div class="list" id="chatAdminList"></div>
+      <button class="addBtn" onclick="toggleChatForm('she')">＋ 她说了一句</button>
+      <button class="addBtn" onclick="toggleChatForm('me')">＋ 我说了一句</button>
+      <button class="addBtn" onclick="toggleChatForm('egg')">＋ 中间插入彩蛋</button>
+      <div class="form" id="chatForm">
+        <select id="cfPos"></select>
+        <input id="cfText" placeholder="内容文字...">
+        <select id="cfEgg" style="display:none"></select>
+        <div class="row">
+          <button class="save" onclick="saveChatForm()">保存</button>
+          <button class="cancel" onclick="document.getElementById('chatForm').classList.remove('show')">取消</button>
+        </div>
       </div>
     </div>
+
+    <!-- 爱心管理 -->
+    <div id="adminEggs" style="display:none">
+      <div class="list" id="adminList"></div>
+      <button class="addBtn" onclick="document.getElementById('adminForm').classList.add('show')">＋ 添加新爱心</button>
+      <div class="form" id="adminForm">
+        <input id="fTitle" placeholder="标题，比如：第一次">
+        <textarea id="fBody" placeholder="故事内容..."></textarea>
+        <input type="file" id="fImg" accept="image/*">
+        <div class="row">
+          <button class="save" onclick="saveEgg()">保存</button>
+          <button class="cancel" onclick="document.getElementById('adminForm').classList.remove('show')">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 信编辑 -->
+    <div id="adminLetter" style="display:none">
+      <div class="form show">
+        <input id="lfTitle" placeholder="信标题，比如：写给你">
+        <textarea id="lfBody" placeholder="信正文，每行一段..."></textarea>
+        <input id="lfSign" placeholder="落款，比如：属于我们的时间 · 未完待续">
+        <div class="row">
+          <button class="save" onclick="saveLetter()">保存</button>
+        </div>
+      </div>
+    </div>
+
     <button class="changePwd" onclick="changePwd()">修改密码</button>
   </div>
 
@@ -437,13 +472,22 @@
 <script>
 /* ============ 数据 ============ */
 // side: me=她(右,自己) / you=他(左,对方)
-const SCRIPT = [
+const DEFAULT_CHAT = [
   {side:"you", who:"她", t:"那天你发过来一句在吗，我盯着屏幕想了十分钟怎么回才不尴尬。"},
   {side:"me",  who:"你", t:"后来聊到半夜三点，我才发现原来有人跟我一样，睡不着。"},
   {side:"you", who:"她", t:"有些话当时没敢说，今天偷偷挂在这棵树上。", node:0},
   {side:"me",  who:"你", t:"那我也挂一个。你翻翻看，每一点都是我认真记下来的东西。"},
   {side:"you", who:"她", t:"看完了吗。那……这棵树，我们一起养着。", end:true},
 ];
+function loadChat(){
+  try{
+    const s = localStorage.getItem('us_chat');
+    if(s){ const a = JSON.parse(s); if(a && a.length) return a; }
+  }catch(e){}
+  return DEFAULT_CHAT.slice();
+}
+function saveChat(){ localStorage.setItem('us_chat', JSON.stringify(SCRIPT)); }
+let SCRIPT = loadChat();
 const DEFAULT_EGGS = [
   {k:"Egg 01", title:"第一次", en:"The First",
    body:"你说你紧张到打了又删、删了又打。其实我也是。那句“在吗”我截了图，存到现在。"},
@@ -564,6 +608,7 @@ document.getElementById('startBtn').onclick = (e)=>{
     };
   });
   document.getElementById('stage-open').classList.add('hidden');
+  document.getElementById('adminBtn').style.display = 'flex';
   document.getElementById('stage-chat').classList.remove('hidden');
   document.getElementById('menu').classList.add('on');
   nextLine(0);
@@ -608,7 +653,7 @@ function afterLine(s, bubble){
     choicesEl.appendChild(b);
   } else if(s.end){
     const b = document.createElement('button');
-    b.textContent = "看看那棵树";
+    b.textContent = "让我们看见这段故事吧";
     b.onclick = (e)=>{ e.stopPropagation(); goTree(); };
     choicesEl.appendChild(b);
   } else {
@@ -622,6 +667,7 @@ const stageChatEl = document.getElementById('stage-chat');
 const egg = document.getElementById('egg');
 let currentEgg = 0;
 function openEgg(idx){
+  if(idx < 0 || idx >= EGGS.length){ alert('这个彩蛋对应的故事已被删除，请在管理中补上'); return; }
   currentEgg = idx;
   const e = EGGS[idx];
   document.getElementById('eggTitle').textContent = e.title;
@@ -855,6 +901,7 @@ function showAsk(){
 function startLoad(){
   document.getElementById('ask').classList.remove('show');
   document.getElementById('loading').classList.add('show');
+  renderLetter();
   setTimeout(()=>{
     document.getElementById('loading').classList.remove('show');
     document.getElementById('final').classList.add('show');
@@ -864,18 +911,6 @@ function startLoad(){
 /* ============ 管理爱心 ============ */
 function getPwd(){
   return localStorage.getItem('us_pwd') || '1234';
-}
-function checkPwd(){
-  const v = document.getElementById('pwdInput').value;
-  if(v === getPwd()){
-    document.getElementById('pwd').classList.remove('show');
-    document.getElementById('pwdInput').value='';
-    document.getElementById('pwdErr').style.display='none';
-    renderAdminList();
-    document.getElementById('admin').classList.add('show');
-  } else {
-    document.getElementById('pwdErr').style.display='block';
-  }
 }
 function changePwd(){
   const oldP = prompt('请输入旧密码：');
@@ -913,12 +948,135 @@ function checkPwd(){
     var p = document.getElementById('pwd');
     p.style.pointerEvents='none';
     p.style.opacity='0';
-    renderAdminList();
-    document.getElementById('admin').classList.add('show');
+    openAdmin();
   } else {
     document.getElementById('pwdErr').style.display='block';
   }
 }
+/* 根据当前界面打开对应管理块 */
+function currentStage(){
+  if(document.getElementById('final').classList.contains('show')) return 'letter';
+  const t = document.getElementById('stage-tree');
+  if(!t.classList.contains('hidden') && t.classList.contains('on')) return 'tree';
+  return 'chat';
+}
+function openAdmin(){
+  const st = currentStage();
+  document.getElementById('adminTitle').textContent =
+    st==='chat' ? '💬 管理聊天' : st==='letter' ? '✉ 编辑信' : '❤ 管理爱心故事';
+  document.getElementById('adminChat').style.display   = st==='chat'   ? 'block' : 'none';
+  document.getElementById('adminEggs').style.display   = st==='tree'   ? 'block' : 'none';
+  document.getElementById('adminLetter').style.display = st==='letter' ? 'block' : 'none';
+  if(st==='chat'){ renderChatAdmin(); fillChatForm(); }
+  else if(st==='tree'){ renderAdminList(); }
+  else if(st==='letter'){ fillLetterForm(); }
+  document.getElementById('admin').classList.add('show');
+}
+/* ---------- 聊天管理 ---------- */
+function renderChatAdmin(){
+  const list = document.getElementById('chatAdminList');
+  list.innerHTML = '';
+  SCRIPT.forEach((m,i)=>{
+    const div = document.createElement('div');
+    div.className = 'item';
+    const isEgg = m.node !== undefined;
+    const tag = isEgg ? '彩蛋' : (m.side==='me' ? '我说' : '她说');
+    div.innerHTML =
+      `<div class="info"><div class="t">${isEgg?'[彩蛋]':''} ${tag}</div><div class="b">${m.t}</div></div>` +
+      `<button onclick="moveChat(${i},-1)">↑</button>` +
+      `<button onclick="moveChat(${i},1)">↓</button>` +
+      `<button onclick="delChat(${i})">删</button>`;
+    list.appendChild(div);
+  });
+}
+function moveChat(i,d){
+  const j = i+d;
+  if(j<0 || j>=SCRIPT.length) return;
+  const tmp = SCRIPT[i]; SCRIPT[i] = SCRIPT[j]; SCRIPT[j] = tmp;
+  saveChat(); renderChatAdmin(); replayChat();
+}
+function delChat(i){
+  SCRIPT.splice(i,1);
+  saveChat(); renderChatAdmin(); replayChat();
+}
+let chatFormType = 'she';
+function toggleChatForm(type){
+  chatFormType = type;
+  const f = document.getElementById('chatForm');
+  f.classList.add('show');
+  document.getElementById('cfEgg').style.display = type==='egg' ? 'block' : 'none';
+  document.getElementById('cfText').placeholder =
+    type==='egg' ? '彩蛋提示文字（点这条会弹出爱心故事）' : (type==='she' ? '她说了一句：' : '我说了一句：');
+  fillChatForm();
+}
+function fillChatForm(){
+  const pos = document.getElementById('cfPos');
+  pos.innerHTML = '';
+  ['开头'].forEach(function(t,i){ const o=document.createElement('option'); o.value=0; o.textContent='开头'; pos.appendChild(o); });
+  SCRIPT.forEach(function(m,i){ const o=document.createElement('option'); o.value=i+1; o.textContent='第'+(i+1)+'条后'; pos.appendChild(o); });
+  const oe=document.createElement('option'); oe.value=SCRIPT.length; oe.textContent='末尾'; pos.appendChild(oe);
+  const es = document.getElementById('cfEgg');
+  es.innerHTML = '';
+  EGGS.forEach(function(e,i){ const o=document.createElement('option'); o.value=i; o.textContent=(i+1)+'. '+e.title; es.appendChild(o); });
+}
+function saveChatForm(){
+  const pos = parseInt(document.getElementById('cfPos').value, 10);
+  const text = document.getElementById('cfText').value.trim();
+  if(!text) return alert('内容不能为空');
+  let m;
+  if(chatFormType==='egg'){
+    const ei = parseInt(document.getElementById('cfEgg').value, 10);
+    if(ei<0 || ei>=EGGS.length) return alert('请先在爱心管理里添加故事');
+    m = {side:'you', who:'她', t:text, node:ei};
+  } else {
+    m = {side: chatFormType==='me'?'me':'you', who: chatFormType==='me'?'你':'她', t:text};
+  }
+  SCRIPT.splice(pos, 0, m);
+  saveChat(); renderChatAdmin(); fillChatForm();
+  document.getElementById('cfText').value='';
+  document.getElementById('chatForm').classList.remove('show');
+  replayChat();
+}
+function replayChat(){
+  chatLog.innerHTML = '';
+  choicesEl.innerHTML = '';
+  li = 0;
+  nextLine(0);
+}
+/* ---------- 信编辑 ---------- */
+const DEFAULT_LETTER = {
+  title:"写给你",
+  body:"从 2025 年 8 月 12 日到今天，\n我数过我们一起走过的每一个日子，数到后来就不想数了——\n因为往后还很长，我想慢慢和你过。\n这棵树上的每一颗星，都是我偷偷记下的、关于你的瞬间。\n以后的每一场雪，我都想和你一起站着看完。\n—— 我喜欢你，是认真的。",
+  sign:"属于我们的时间 · 未完待续"
+};
+function loadLetter(){
+  try{ const s = localStorage.getItem('us_letter'); if(s) return JSON.parse(s); }catch(e){}
+  return Object.assign({}, DEFAULT_LETTER);
+}
+function renderLetter(){
+  const L = loadLetter();
+  document.querySelector('#final h2').textContent = L.title;
+  document.querySelector('#final .letter').innerHTML =
+    L.body.split('\n').map(function(p){ return p.trim() ? '<p>'+p+'</p>' : ''; }).join('');
+  document.querySelector('#final .sign').textContent = L.sign;
+}
+function fillLetterForm(){
+  const L = loadLetter();
+  document.getElementById('lfTitle').value = L.title;
+  document.getElementById('lfBody').value = L.body;
+  document.getElementById('lfSign').value = L.sign;
+}
+function saveLetter(){
+  const title = document.getElementById('lfTitle').value.trim();
+  const body = document.getElementById('lfBody').value.trim();
+  const sign = document.getElementById('lfSign').value.trim();
+  if(!title || !body) return alert('标题和正文必填');
+  localStorage.setItem('us_letter', JSON.stringify({title:title, body:body, sign:sign}));
+  renderLetter();
+  document.getElementById('admin').classList.remove('show');
+  alert('信已保存');
+}
+renderLetter();
 function delEgg(i){
   EGGS.splice(i,1);
   saveEggs();
